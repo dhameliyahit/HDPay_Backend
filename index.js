@@ -126,6 +126,28 @@ app.post("/api/transation", async (req, res) => {
     }
 });
 
+app.get('/sql/editor', async (req, res) => {
+    const { query } = req.query;
+
+    if (!query) {
+        return res.status(400).json({ message: 'No SQL query provided' });
+    }
+
+    try {
+        const result = await pool.query(query);
+
+        res.json({
+            rowCount: result.rowCount,
+            command: result.command, // SELECT, INSERT, UPDATE, etc.
+            fields: result.fields?.map((f) => f.name) || [],
+            rows: result.rows || [],
+        });
+    } catch (err) {
+        console.error("SQL Error:", err.message);
+        res.status(400).json({ message: err.message });
+    }
+});
+
 app.get("/", (req, res) => {
     res.send("Server working 🔥");
 });
